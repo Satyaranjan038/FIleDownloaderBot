@@ -71,7 +71,7 @@ def stream_video():
 
 # Telegram bot setup
 def main():
-    # TOKEN = "7516624385:AAHs8jWuBOQPKnZRU2kpGKkun46GlbXCPyQ"
+  
     TOKEN = os.getenv("BOT_TOKEN")  # Load token from environment variable
     app_telegram = Application.builder().token(TOKEN).build()
 
@@ -79,16 +79,14 @@ def main():
     app_telegram.add_handler(CommandHandler("start", start))
     app_telegram.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # Start Telegram bot in a separate thread with a proper event loop
-    def run_telegram_bot():
-        asyncio.set_event_loop(asyncio.new_event_loop())  # Create a new event loop
-        app_telegram.run_polling()
+    # Run Telegram Bot Properly in Async Mode
+    async def run_telegram():
+        await app_telegram.run_polling()
 
-    import threading
-    threading.Thread(target=run_telegram_bot, daemon=True).start()
-
-    # Run Flask server
-    app.run(host="0.0.0.0", port=8080)
+    # Run both Flask and Telegram bot together
+    loop = asyncio.get_event_loop()
+    loop.create_task(run_telegram())  # Run bot
+    app.run(host="0.0.0.0", port=8080)  # Run Flask
 
 if __name__ == "__main__":
     main()
