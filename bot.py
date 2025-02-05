@@ -1,4 +1,5 @@
 import re
+import os
 import urllib.parse
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -80,7 +81,7 @@ async def handle_message(update: Update, context: CallbackContext):
 
 # Main function to run the bot
 def main():
-    TOKEN = "7516624385:AAHs8jWuBOQPKnZRU2kpGKkun46GlbXCPyQ"  # Replace with your Telegram Bot token
+    TOKEN = os.getenv("BOT_TOKEN") # Replace with your Telegram Bot token
     app = Application.builder().token(TOKEN).build()
 
     # Handlers
