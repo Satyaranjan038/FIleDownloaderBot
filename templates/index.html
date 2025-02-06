@@ -8,113 +8,64 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #fff;
             margin: 0;
             padding: 0;
+            background-color: #000;
+            color: #fff;
         }
         .video-container {
-            position: relative;
-            width: 80%;
-            max-width: 800px;
+            width: 90%;
+            max-width: 900px;
             margin: auto;
-            background: #000;
-            transform-origin: center;
-            transition: transform 0.3s ease-in-out;
+            position: relative;
         }
-        video {
+        iframe {
             width: 100%;
-            height: 450px;
+            height: 500px;
             border: none;
-            display: block;
         }
         .controls {
-            display: flex;
-            justify-content: space-around;
+            margin-top: 10px;
+        }
+        button {
             padding: 10px;
-            background: #222;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-        .controls button {
-            background: #444;
-            color: white;
+            margin: 5px;
+            font-size: 16px;
             border: none;
-            padding: 8px 12px;
             cursor: pointer;
-            border-radius: 4px;
         }
-        .controls button:hover {
-            background: #666;
+        .download-btn {
+            background-color: green;
+            color: white;
+        }
+        .rotate-btn {
+            background-color: blue;
+            color: white;
         }
     </style>
 </head>
 <body>
     <h2>Streaming Video</h2>
-    
-    <div class="video-container" id="videoContainer">
-        <video id="videoPlayer" controls>
-            <source src="{{ video_url }}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <div class="video-container">
+        <iframe id="videoFrame" src="{{ video_url }}" allowfullscreen></iframe>
+    </div>
 
-        <!-- Download & Rotate Buttons -->
-        <div class="controls">
-            <button onclick="toggleFullScreen()">🔲 Full Screen</button>
-            <button onclick="rotateVideo()">🔄 Rotate</button>
-            <button onclick="downloadVideo()">⬇️ Download</button>
-        </div>
+    <div class="controls">
+        <button class="download-btn" onclick="downloadVideo()">⬇ Download</button>
+        <button class="rotate-btn" onclick="rotateVideo()">🔄 Rotate</button>
     </div>
 
     <script>
-        const video = document.getElementById('videoPlayer');
-        const videoContainer = document.getElementById('videoContainer');
         let rotation = 0;
-
-        // Double Tap Events (Skip/Rewind 10s)
-        let lastTap = 0;
-        video.addEventListener("touchend", (event) => {
-            const currentTime = new Date().getTime();
-            const tapGap = currentTime - lastTap;
-
-            if (tapGap < 300) { // Double Tap Detected
-                const tapX = event.changedTouches[0].clientX;
-                const midPoint = window.innerWidth / 2;
-
-                if (tapX > midPoint) {
-                    video.currentTime += 10; // Forward 10s
-                } else {
-                    video.currentTime -= 10; // Backward 10s
-                }
-            }
-
-            lastTap = currentTime;
-        });
-
-        // Full-Screen Toggle
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                video.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        // Rotate Video
+        
         function rotateVideo() {
-            rotation = (rotation + 90) % 360;
-            videoContainer.style.transform = `rotate(${rotation}deg)`;
+            rotation += 90;
+            document.getElementById("videoFrame").style.transform = `rotate(${rotation}deg)`;
         }
 
-        // Download Video
         function downloadVideo() {
-            const videoUrl = "{{ video_url }}";
-            const link = document.createElement('a');
-            link.href = videoUrl;
-            link.download = 'video.mp4';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const videoUrl = "{{ video_url }}"; // Ensure this is a direct downloadable link
+            window.open(videoUrl, "_blank");
         }
     </script>
 </body>
