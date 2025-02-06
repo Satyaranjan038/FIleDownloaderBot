@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Stream Video</title>
     <style>
         body {
@@ -14,25 +14,29 @@
             color: #fff;
         }
         .video-container {
-            width: 90%;
+            width: 100%;
             max-width: 900px;
             margin: auto;
             position: relative;
         }
         iframe {
             width: 100%;
-            height: 500px;
+            height: 50vh; /* Responsive height */
             border: none;
+            transition: transform 0.3s ease-in-out;
         }
         .controls {
             margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
         button {
-            padding: 10px;
-            margin: 5px;
+            padding: 12px;
             font-size: 16px;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
         }
         .download-btn {
             background-color: green;
@@ -42,17 +46,39 @@
             background-color: blue;
             color: white;
         }
+        /* Fullscreen Styles */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            background-color: black;
+        }
+
+        /* Mobile-Friendly Adjustments */
+        @media (max-width: 600px) {
+            iframe {
+                height: 60vh; /* Increase height for mobile */
+            }
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
     <h2>Streaming Video</h2>
-    <div class="video-container">
+    <div class="video-container" id="videoContainer">
         <iframe id="videoFrame" src="{{ video_url }}" allowfullscreen></iframe>
     </div>
 
     <div class="controls">
         <button class="download-btn" onclick="downloadVideo()">⬇ Download</button>
         <button class="rotate-btn" onclick="rotateVideo()">🔄 Rotate</button>
+        <button class="rotate-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
     </div>
 
     <script>
@@ -66,6 +92,17 @@
         function downloadVideo() {
             const videoUrl = "{{ video_url }}"; // Ensure this is a direct downloadable link
             window.open(videoUrl, "_blank");
+        }
+
+        function toggleFullscreen() {
+            const videoContainer = document.getElementById("videoContainer");
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    alert(`Error attempting full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         }
     </script>
 </body>
