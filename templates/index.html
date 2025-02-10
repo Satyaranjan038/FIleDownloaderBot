@@ -12,6 +12,7 @@
             background-color: #1a1a1a;
             color: #fff;
             overflow-x: hidden;
+            text-align: center;
         }
         .video-container {
             width: 100%;
@@ -67,17 +68,28 @@
             bottom: 0;
             left: 0;
         }
+        #loadingMessage {
+            font-size: 20px;
+            margin-top: 50px;
+            color: yellow;
+        }
     </style>
 </head>
 <body>
+    <h1>Video Streaming</h1>
+
+    <div id="loadingMessage">Please wait 2 minutes, the service is starting...</div>
+
     <div class="video-container" id="videoContainer">
         <iframe id="videoFrame" src="" allowfullscreen></iframe>
     </div>
+
     <div class="controls">
         <button onclick="downloadVideo()">⬇ Download</button>
         <button onclick="rotateVideo()">🔄 Rotate</button>
         <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
     </div>
+    
     <div class="history-container" id="historyContainer"></div>
 
     <script>
@@ -86,13 +98,34 @@
         let videoHistory = JSON.parse(localStorage.getItem('videoHistory')) || [];
         const videoFrame = document.getElementById('videoFrame');
         const videoContainer = document.getElementById('videoContainer');
+        const loadingMessage = document.getElementById('loadingMessage');
 
-        function addToHistory(url) {
+        // Check if Render service is up
+        async function checkService() {
+            try {
+                let response = await fetch("https://filedownloaderbot-jzw6.onrender.com/");
+                if (response.ok) {
+                    loadingMessage.style.display = "none";
+                    videoContainer.style.display = "block";
+                    loadVideo(videoUrl);
+                } else {
+                    setTimeout(checkService, 5000); // Retry after 5 seconds
+                }
+            } catch (error) {
+                setTimeout(checkService, 5000);
+            }
+        }
+
+        checkService();
+
+        function addToHistory(url, progress = 0) {
             let existingEntry = videoHistory.find(v => v.url === url);
             if (!existingEntry) {
-                videoHistory.push({ url: url, progress: 0 });
-                localStorage.setItem('videoHistory', JSON.stringify(videoHistory));
+                videoHistory.push({ url, progress });
+            } else {
+                existingEntry.progress = progress; // Update progress if it exists
             }
+            localStorage.setItem('videoHistory', JSON.stringify(videoHistory));
             displayHistory();
         }
 
@@ -104,7 +137,7 @@
                 const videoItem = document.createElement('div');
                 videoItem.className = 'history-item';
                 videoItem.textContent = `Video ${index + 1}`;
-                videoItem.onclick = function() {
+                videoItem.onclick = function () {
                     loadVideo(video.url);
                 };
 
@@ -121,17 +154,14 @@
         function loadVideo(url) {
             let savedVideo = videoHistory.find(v => v.url === url);
             videoFrame.src = url;
-            if (savedVideo && savedVideo.progress) {
-                setTimeout(() => {
-                    videoFrame.contentWindow.postMessage({ type: 'seek', time: savedVideo.progress }, '*');
-                }, 1000);
-            }
+            videoFrame.onload = function () {
+                if (savedVideo && savedVideo.progress) {
+                    setTimeout(() => {
+                        videoFrame.contentWindow.postMessage({ type: 'seek', time: savedVideo.progress }, '*');
+                    }, 1000);
+                }
+            };
         }
-
-        videoFrame.src = videoUrl;
-        setTimeout(() => videoContainer.style.display = "block", 500);
-        addToHistory(videoUrl);
-        displayHistory();
 
         function rotateVideo() {
             rotation += 90;
