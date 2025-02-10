@@ -1,3 +1,4 @@
 Flask
 python-telegram-bot
 requests
+flask-cors==3.0.10
