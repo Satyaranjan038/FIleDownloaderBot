@@ -1,6 +1,10 @@
 from flask import Flask, request, render_template
+from flask_cors import CORS  # Importing the CORS module
 
 app = Flask(__name__)
+
+# Enable CORS for all domains
+CORS(app)
 
 @app.route("/")
 def home():
